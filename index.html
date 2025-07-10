@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Real Estate Checklist</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #f4f4f4; color: #333; }
+    h2 { text-align: center; }
+    form, .controls, ul { max-width: 600px; margin: 0 auto; }
+    input, select, button {
+      width: 100%; padding: 10px; margin: 6px 0;
+      border-radius: 5px; border: 1px solid #ccc;
+    }
+    button { background-color: #007bff; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    ul { list-style: none; padding: 0; }
+    li {
+      background: #fff; padding: 10px; margin-bottom: 10px;
+      border-left: 4px solid #007bff; border-radius: 4px;
+    }
+    .record-type { font-weight: bold; color: #007bff; }
+  </style>
+  <script>
+    let records = JSON.parse(localStorage.getItem('records') || '[]');
+
+    const save = () => {
+      const type = document.querySelector('input[name="type"]:checked').value;
+      const data = {};
+      document.querySelectorAll('[data-field]').forEach(input => {
+        data[input.dataset.field] = input.value.trim();
+      });
+      data['type'] = type;
+
+      if (data.propertyName && data.location) {
+        records.push(data);
+        localStorage.setItem('records', JSON.stringify(records));
+        document.getElementById('form').reset();
+        render();
+        alert("✅ Record added successfully!");
+      } else {
+        alert("⚠️ Property Name and Location are required.");
+      }
+    };
+
+    const render = () => {
+      const list = document.getElementById('list');
+      list.innerHTML = '';
+      records.forEach((r, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <span class="record-type">${r.type}</span><br>
+          🏠 ${r.propertyName}<br>
+          📍 ${r.location}<br>
+          📐 ${r.propertySize || ''} sqft<br>
+          💰 Rent: BDT ${r.rent || ''} | SC: ${r.serviceCharge || ''}<br>
+          📞 ${r.contact || ''}<br>
+          🛗 Lift: ${r.numberOfLift || ''}, 🚗 Parking: ${r.numberOfParking || ''}<br>
+          🏢 Type: ${r.propertyType || ''}, Interior: ${r.interior || ''}
+        `;
+        list.appendChild(li);
+      });
+    };
+
+    const exportToExcel = () => {
+      if (!records.length) return;
+      const fields = Object.keys(records[0]);
+      let csv = fields.join(',') + "\n";
+      records.forEach(r => {
+        csv += fields.map(f => r[f] || '').join(',') + "\n";
+      });
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'real_estate_records.csv';
+      a.click();
+    };
+
+    const shareWhatsApp = () => {
+      const msg = records.map(r =>
+        `🏠 ${r.propertyName}\n📍 ${r.location}\n📐 ${r.propertySize || r.size} sqft\n💰 BDT ${r.rent || r.price}\n📞 ${r.contact}\n📂 ${r.type}`
+      ).join("\n\n");
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    };
+
+    window.onload = render;
+  </script>
+</head>
+<body>
+  <h2>Real Estate Checklist</h2>
+  <form id="form" onsubmit="event.preventDefault(); save();">
+    <label><input type="radio" name="type" value="Commercial Rental" checked> Commercial Rental</label>
+    <label><input type="radio" name="type" value="Residential Sale"> Residential Sale</label>
+
+    <input data-field="propertyName" placeholder="Property Name" required />
+    <input data-field="location" placeholder="Location" required />
+    <input data-field="propertySize" placeholder="Property Size (sqft)" />
+    <input data-field="numberOfBalcony" placeholder="Number of Balcony" />
+    <input data-field="numberOfParking" placeholder="Number of Parking" />
+    <input data-field="numberOfLift" placeholder="Number of Lift" />
+    <input data-field="floor" placeholder="Floor" />
+    <input data-field="unit" placeholder="Unit" />
+    <input data-field="unitPerFloor" placeholder="Unit Per Floor" />
+    <input data-field="rent" placeholder="Rent (BDT)" />
+    <input data-field="serviceCharge" placeholder="Service Charge (BDT)" />
+    <input data-field="advance" placeholder="Advance (BDT)" />
+    <input data-field="securityDeposit" placeholder="Security Deposit (BDT)" />
+    <input data-field="yearBuilt" placeholder="Year Built" />
+    <input data-field="propertyType" placeholder="Property Type" />
+    <input data-field="interior" placeholder="Interior" />
+    <input data-field="contact" placeholder="Contact Info" />
+
+    <button type="submit">➕ Add Record</button>
+  </form>
+
+  <div class="controls">
+    <button onclick="exportToExcel()">📁 Download Excel</button>
+    <button onclick="shareWhatsApp()">📤 Share via WhatsApp</button>
+  </div>
+
+  <h3 style="text-align:center;">Records</h3>
+  <ul id="list"></ul>
+</body>
+</html>
