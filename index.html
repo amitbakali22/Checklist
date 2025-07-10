@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Real Estate Checklist</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(to bottom, #e9ecef, #f8f9fa);
+      padding: 20px;
+      margin: 0;
+      min-height: 100vh;
+    }
+    h2, h3 { text-align: center; color: #343a40; }
+    .container { max-width: 900px; margin: auto; }
+    form, .controls, .search-filter { 
+      background: #fff; 
+      padding: 20px; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+      margin-bottom: 20px; 
+    }
+    input, select, button {
+      width: 100%; 
+      padding: 10px; 
+      margin: 8px 0; 
+      border-radius: 6px; 
+      border: 1px solid #ced4da; 
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    input:focus, select:focus { 
+      border-color: #007bff; 
+      outline: none; 
+      box-shadow: 0 0 5px rgba(0,123,255,0.3); 
+    }
+    button { 
+      background: #007bff; 
+      color: white; 
+      border: none; 
+      cursor: pointer; 
+      transition: background 0.3s, transform 0.2s; 
+    }
+    button:hover { background: #0056b3; transform: scale(1.05); }
+    button.secondary { background: #6c757d; }
+    button.secondary:hover { background: #5a6268; }
+    button.danger { background: #dc3545; }
+    button.danger:hover { background: #c82333; }
+    button.whatsapp { background: #25D366; }
+    button.whatsapp:hover { background: #20b358; }
+    button.download { background: #17a2b8; }
+    button.download:hover { background: #138496; }
+    .hidden { display: none; }
+    .record { 
+      background: #fff; 
+      padding: 15px; 
+      margin: 10px 0; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+      animation: fadeIn 0.5s; 
+    }
+    .record:hover { transform: translateY(-2px); transition: transform 0.2s; }
+    .field-group { 
+      margin-bottom: 15px; 
+      padding: 10px; 
+      border: 1px solid #e9ecef; 
+      border-radius: 6px; 
+    }
+    .field-group legend { font-weight: bold; color: #007bff; }
+    .error { border-color: #dc3545; }
+    .success-message, .download-message { 
+      color: #28a745; 
+      text-align: center; 
+      margin: 10px 0; 
+      animation: fadeOut 3s forwards; 
+    }
+    .controls, .search-filter { 
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+    }
+    .search-filter input, .search-filter select { width: auto; flex: 1; }
+    .tooltip { 
+      position: relative; 
+      display: inline-block; 
+    }
+    .tooltip .tooltiptext { 
+      visibility: hidden; 
+      background: #333; 
+      color: white; 
+      text-align: center; 
+      border-radius: 4px; 
+      padding: 5px; 
+      position: absolute; 
+      z-index: 1; 
+      bottom: 125%; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      opacity: 0; 
+      transition: opacity 0.3s; 
+    }
+    .tooltip:hover .tooltiptext { 
+      visibility: visible; 
+      opacity: 1; 
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    @media (max-width: 600px) {
+      input, select, button { font-size: 14px; }
+      .controls, .search-filter { flex-direction: column; }
+      .record div:last-child { flex-direction: column; gap: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Real Estate Checklist</h2>
+
+  <form id="form" onsubmit="event.preventDefault(); save();">
+    <div class="field-group">
+      <legend>Property Type</legend>
+      <label><input type="radio" name="type" value="Commercial Rental" checked onchange="toggleFields()"> Commercial Rental</label>
+      <label><input type="radio" name="type" value="Residential Sale" onchange="toggleFields()"> Residential Sale</label>
+    </div>
+
+    <div class="field-group">
+      <legend>Basic Info</legend>
+      <input data-field="propertyName" placeholder="Property Name" required oninput="validateInput(this)" />
+      <input data-field="location" placeholder="Location" required oninput="validateInput(this)" />
+      <input data-field="developer" placeholder="Developer" />
+      <input data-field="propertySize" placeholder="Property Size (sqft)" type="number" />
+    </div>
+
+    <!-- Commercial -->
+    <div class="type-commercial field-group">
+      <legend>Commercial Details</legend>
+      <input data-field="numberOfBalcony" placeholder="Number of Balcony" type="number" />
+      <input data-field="numberOfParking" placeholder="Number of Parking" type="number" />
+      <input data-field="numberOfLift" placeholder="Number of Lift" type="number" />
+      <input data-field="floor" placeholder="Floor" />
+      <input data-field="unit" placeholder="Unit" />
+      <input data-field="unitPerFloor" placeholder="Unit Per Floor" type="number" />
+      <input data-field="rent" placeholder="Rent (BDT)" type="number" />
+      <input data-field="serviceCharge" placeholder="Service Charge (BDT)" type="number" />
+      <input data-field="advance" placeholder="Advance (BDT)" type="number" />
+      <input data-field="securityDeposit" placeholder="Security Deposit (BDT)" type="number" />
+      <input data-field="yearBuilt" placeholder="Year Built" type="number" />
+      <input data-field="propertyType" placeholder="Property Type" />
+      <input data-field="interior" placeholder="Interior" />
+    </div>
+
+    <!-- Residential -->
+    <div class="type-residential field-group hidden">
+      <legend>Residential Details</legend>
+      <input data-field="bed" placeholder="Bed" type="number" />
+      <input data-field="bath" placeholder="Bath" type="number" />
+      <input data-field="numOfBalcony" placeholder="Number of Balcony" type="number" />
+      <input data-field="parking" placeholder="Parking" />
+      <input data-field="lift" placeholder="Lift" />
+      <input data-field="floor" placeholder="Floor" />
+      <input data-field="unit" placeholder="Unit" />
+      <input data-field="unitPerFloor" placeholder="Unit Per Floor" type="number" />
+      <input data-field="totalUnits" placeholder="Total Units" type="number" />
+      <input data-field="price" placeholder="Price (BDT)" type="number" />
+      <input data-field="serviceCharge" placeholder="Service Charge (BDT)" type="number" />
+      <input data-field="yearBuilt" placeholder="Year Built" type="number" />
+      <input data-field="garageSize" placeholder="Garage Size (sqft)" type="number" />
+      <input data-field="propertyType" placeholder="Property Type" />
+      <input data-field="propertyPurpose" placeholder="Property Purpose" />
+      <input data-field="interior" placeholder="Interior" />
+      <input data-field="buildingRegistrationType" placeholder="Building Registration Type" />
+      <input data-field="frontRoadSize" placeholder="Front Road Size" />
+      <input data-field="commonArea" placeholder="Common Area" />
+      <input data-field="gas" placeholder="Gas (Yes/No)" />
+      <input data-field="servantRoom" placeholder="Servant Room" />
+      <input data-field="servantWashroom" placeholder="Servant Washroom" />
+      <input data-field="apartmentFacing" placeholder="Apartment Facing" />
+    </div>
+
+    <div class="field-group">
+      <legend>Contact</legend>
+      <input data-field="contact" placeholder="Contact Info" />
+    </div>
+
+    <div style="display: flex; gap: 10px;">
+      <button type="submit">Add Record</button>
+      <button type="button" class="secondary" onclick="document.getElementById('form').reset(); toggleFields();">Clear Form</button>
+    </div>
+  </form>
+
+  <div class="search-filter">
+    <input id="search" placeholder="Search by Property Name or Location" oninput="filterRecords()" />
+    <select id="filterType" onchange="filterRecords()">
+      <option value="All">All Types</option>
+      <option value="Commercial Rental">Commercial Rental</option>
+      <option value="Residential Sale">Residential Sale</option>
+    </select>
+    <select id="sortBy" onchange="sortRecords()">
+      <option value="none">Sort By</option>
+      <option value="price">Price/Rent (Low to High)</option>
+      <option value="yearBuilt">Year Built (Newest First)</option>
+    </select>
+  </div>
+
+  <div class="controls">
+    <button onclick="exportToExcel()">📁 Download All as CSV</button>
+    <button onclick="shareWhatsApp()">📤 Share All</button>
+  </div>
+
+  <div id="success-message" class="success-message hidden">Record added successfully!</div>
+  <div id="download-message" class="download-message hidden">File downloaded successfully!</div>
+
+  <h3>Records</h3>
+  <ul id="list"></ul>
+</div>
+
+<script>
+  let records = JSON.parse(localStorage.getItem('records') || '[]');
+  let editingIndex = null;
+
+  // Define all possible fields for CSV
+  const allFields = [
+    'type', 'propertyName', 'location', 'developer', 'propertySize',
+    'numberOfBalcony', 'numberOfParking', 'numberOfLift', 'floor', 'unit', 'unitPerFloor',
+    'rent', 'serviceCharge', 'advance', 'securityDeposit', 'yearBuilt', 'propertyType', 'interior',
+    'bed', 'bath', 'numOfBalcony', 'parking', 'lift', 'totalUnits', 'price',
+    'garageSize', 'propertyPurpose', 'buildingRegistrationType', 'frontRoadSize',
+    'commonArea', 'gas', 'servantRoom', 'servantWashroom', 'apartmentFacing', 'contact'
+  ];
+
+  const save = () => {
+    const type = document.querySelector('input[name="type"]:checked').value;
+    const data = { type };
+    let isValid = true;
+
+    document.querySelectorAll('[data-field]').forEach(input => {
+      data[input.dataset.field] = input.value.trim();
+      if (input.required && !input.value.trim()) {
+        input.classList.add('error');
+        isValid = false;
+      } else {
+        input.classList.remove('error');
+      }
+    });
+
+    if (!isValid) return;
+
+    if (editingIndex !== null) {
+      records[editingIndex] = data;
+      editingIndex = null;
+    } else {
+      records.push(data);
+    }
+
+    localStorage.setItem('records', JSON.stringify(records));
+    document.getElementById('form').reset();
+    toggleFields();
+    render();
+    showSuccessMessage();
+  };
+
+  const validateInput = (input) => {
+    if (input.required && !input.value.trim()) {
+      input.classList.add('error');
+    } else {
+      input.classList.remove('error');
+    }
+  };
+
+  const showSuccessMessage = () => {
+    const msg = document.getElementById('success-message');
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 3000);
+  };
+
+  const showDownloadMessage = () => {
+    const msg = document.getElementById('download-message');
+    msg.classList.remove('hidden');
+    setTimeout(() => msg.classList.add('hidden'), 3000);
+  };
+
+  const render = () => {
+    const list = document.getElementById('list');
+    const search = document.getElementById('search').value.toLowerCase();
+    const filterType = document.getElementById('filterType').value;
+
+    list.innerHTML = '';
+    let filteredRecords = records.filter(r => 
+      (r.propertyName.toLowerCase().includes(search) || r.location.toLowerCase().includes(search)) &&
+      (filterType === 'All' || r.type === filterType)
+    );
+
+    const sortBy = document.getElementById('sortBy').value;
+    if (sortBy === 'price') {
+      filteredRecords.sort((a, b) => (Number(a.rent || a.price || 0) - Number(b.rent || b.price || 0)));
+    } else if (sortBy === 'yearBuilt') {
+      filteredRecords.sort((a, b) => Number(b.yearBuilt || 0) - Number(a.yearBuilt || 0));
+    }
+
+    filteredRecords.forEach((r, i) => {
+      const li = document.createElement('li');
+      li.className = 'record';
+      li.innerHTML = `
+        <div><strong>${r.type}</strong>: ${r.propertyName}, ${r.location}, BDT ${r.rent || r.price || 'N/A'}</div>
+        <div>📞 ${r.contact || 'N/A'}</div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <button onclick="editRecord(${i})">✏️ Edit</button>
+          <button class="danger" onclick="deleteRecord(${i})">🗑️ Delete</button>
+          <div class="tooltip">
+            <button class="whatsapp" onclick="shareOne(${i})">📤 Share via WhatsApp</button>
+            <span class="tooltiptext">Share to WhatsApp</span>
+          </div>
+          <div class="tooltip">
+            <button class="download" onclick="downloadOne(${i})">📥 Download</button>
+            <span class="tooltiptext">Download as CSV</span>
+          </div>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+  };
+
+  const editRecord = (index) => {
+    editingIndex = index;
+    const record = records[index];
+    document.querySelector(`input[name="type"][value="${record.type}"]`).checked = true;
+    toggleFields();
+    document.querySelectorAll('[data-field]').forEach(input => {
+      input.value = record[input.dataset.field] || '';
+    });
+  };
+
+  const deleteRecord = (index) => {
+    if (confirm('Are you sure you want to delete this record?')) {
+      recordsduring.splice(index, 1);
+      localStorage.setItem('records', JSON.stringify(records));
+      render();
+    }
+  };
+
+  const filterRecords = () => {
+    render();
+  };
+
+  const sortRecords = () => {
+    render();
+  };
+
+  const exportToExcel = () => {
+    if (!records.length) return alert('No records to export!');
+    let csv = allFields.join(',') + '\n';
+    records.forEach(r => {
+      csv += allFields.map(f => `"${(r[f] || '').replace(/"/g, '""')}"`).join(',') + '\n';
+    });
+    downloadFile(csv, 'real_estate_records.csv');
+    showDownloadMessage();
+  };
+
+  const downloadOne = (index) => {
+    const r = records[index];
+    if (!r.propertyName) return alert('Property Name is required for download.');
+    let csv = allFields.join(',') + '\n';
+    csv += allFields.map(f => `"${(r[f] || '').replace(/"/g, '""')}"`).join(',') + '\n';
+    const safePropertyName = r.propertyName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    downloadFile(csv, `${safePropertyName}.csv`);
+    showDownloadMessage();
+  };
+
+  const downloadFile = (content, fileName) => {
+    const blob = new Blob([content], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const shareWhatsApp = () => {
+    if (!records.length) return alert('No records to share!');
+    const msg = records.map(r => formatRecordMessage(r)).join('\n\n');
+    const encodedMsg = encodeURIComponent(msg).slice(0, 2000);
+    window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+  };
+
+  const shareOne = (i) => {
+    const r = records[i ilan ];
+    if (!r.propertyName || !r.location) {
+      alert('Please ensure the record has a Property Name and Location before sharing.');
+      return;
+    }
+    const msg = formatRecordMessage(r);
+    const encodedMsg = encodeURIComponent(msg).slice(0, 2000);
+    window.open(`https://wa.me/?text=${encodedMsg}`, '_blank');
+  };
+
+  const formatRecordMessage = (r) => {
+    const isCommercial = r.type === 'Commercial Rental';
+    return `🏠 *${r.propertyName}* (${r.type})
+📍 *Location*: ${r.location}
+📐 *Size*: ${r.propertySize || 'N/A'} sqft
+${isCommercial ? `💰 *Rent*: BDT ${r.rent || 'N/A'}\n🛠️ *Service Charge*: BDT ${r.serviceCharge || 'N/A'}\n🔒 *Security Deposit*: BDT ${r.securityDeposit || 'N/A'}` : `💰 *Price*: BDT ${r.price || 'N/A'}\n🛠️ *Service Charge*: BDT ${r.serviceCharge || 'N/A'}`}
+📅 *Year Built*: ${r.yearBuilt || 'N/A'}
+${isCommercial ? `🅿️ *Parking*: ${r.numberOfParking || 'N/A'}\n🛗 *Lifts*: ${r.numberOfLift || 'N/A'}` : `🛏️ *Beds*: ${r.bed || 'N/A'}\n🛁 *Baths*: ${r.bath || 'N/A'}\n� плюс *Parking*: ${r.parking || 'N/A'}\n🛗 *Lifts*: ${r.lift || 'N/A'}`}
+📞 *Contact*: ${r.contact || 'N/A'}
+🏢 *Property Type*: ${r.propertyType || 'N/A'}
+🎨 *Interior*: ${r.interior || 'N/A'}${!isCommercial ? `\n🧭 *Apartment Facing*: ${r.apartmentFacing || 'N/A'}` : ''}`;
+  };
+
+  const toggleFields = () => {
+    const type = document.querySelector('input[name="type"]:checked').value;
+    document.querySelectorAll('.type-commercial').forEach(el => {
+      el.style.display = type === 'Commercial Rental' ? 'block' : 'none';
+    });
+    document.querySelectorAll('.type-residential').forEach(el => {
+      el.style.display = type === 'Residential Sale' ? 'block' : 'none';
+    });
+  };
+
+  window.onload = () => {
+    toggleFields();
+    render();
+  };
+</script>
+
+</body>
+</html>
